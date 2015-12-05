@@ -1,0 +1,11 @@
+[lawg@csd A4l]$ gprof main -p
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total
+ time   seconds   seconds    calls   s/call   s/call  name
+100.20    503.65   503.65        1   503.65   503.65  saveWave
+  0.00    503.65     0.00        1     0.00     0.00  loadIRWave
+  0.00    503.65     0.00        1     0.00     0.00  loadWave
+  0.00    503.65     0.00        1     0.00     0.00  print
+  0.00    503.65     0.00        1     0.00     0.00  printIR
