@@ -33,8 +33,9 @@ struct Header{
 struct Header dryHeader;
 struct Header irHeader;
 
-short* data;
-short* irdata;
+double* data;
+double* irdata;
+double* outdata;
 
 int dryNumSamples;
 int irNumSamples;
@@ -101,177 +102,80 @@ void four1(double data[], int nn, int isign)
 }
 
 
-
-// Creates a sine tone with the specified harmonic number.
-// The array will be filled with complex numbers, and the
-// signal is real (the imaginary parts are set to 0).
-
-void createComplexSine(double data[], int size, int harmonicNumber)
+double * convolve()
 {
-	int i, ii;
+	 double * x;
+	 double * h;
+	 double * y;
+	 
+	 int nn = (int)pow(2, (int) log2(dryNumSamples) + 1);
+	 int nn_2 = 2 * nn; 
+	 
+	 h = (double*) malloc(sizeof(double) * nn_2); 
+	 x = (double*) malloc(sizeof(double) * nn_2); 
+	 y = (double*) malloc(sizeof(double) * nn_2); 
 
-	for (i = 0, ii = 0; i < size; i++, ii += 2) {
-		data[ii] = sin((double)harmonicNumber * (double)i * TWO_PI / (double)size);
-		data[ii + 1] = 0.0;
-	}
-}
-
-
-
-// Creates a cosine tone with the specified harmonic number.
-// The array will be filled with complex numbers, and the
-// signal is real (the imaginary parts are set to 0).
-
-void createComplexCosine(double data[], int size, int harmonicNumber)
-{
-	int i, ii;
-
-	for (i = 0, ii = 0; i < size; i++, ii += 2) {
-		data[ii] = cos((double)harmonicNumber * (double)i * TWO_PI / (double)size);
-		data[ii + 1] = 0.0;
-	}
-}
-
-
-
-// Creates a sawtooth wave, where each harmonic has
-// the amplitude of 1 / harmonic_number.
-// The array will be filled with complex numbers, and the
-// signal is real (the imaginary parts are set to 0)
-
-void createComplexSawtooth(double data[], int size)
-{
-	int i, ii, j;
-
-	//  Calculate waveform using additive synthesis
-	for (i = 0, ii = 0; i < size; i++, ii += 2) {
-		data[ii] = 0.0;
-		data[ii + 1] = 0.0;
-		for (j = 1; j <= size / 2; j++) {
-			data[ii] +=
-				(cos((double)j * (double)i * TWO_PI / (double)size)) / (double)j;
-		}
-	}
-}
-
-
-
-// Display the real and imaginary parts
-// the data contained in the array.
-
-void displayComplex(double data[], int size)
-{
-	int i, ii;
-
-	printf("\t\tReal part \tImaginary Part\n");
-
-	for (i = 0, ii = 0; i < size; i++, ii += 2)
-		printf("data[%-d]: \t%.6f \t%.6f\n", i, data[ii], data[ii + 1]);
-
-	printf("\n");
-}
-
-
-
-// Performs the DFT on the input data,
-// which is assumed to be a real signal.
-// That is, only data at even indices is
-// used to calculate the spectrum.
-
-void complexDFT(double x[], int N)
-{
-	int n, k, nn;
-	double omega = TWO_PI / (double)N;
-	double *a, *b;
-
-	// Allocate temporary arrays
-	a = (double *)calloc(N, sizeof(double));
-	b = (double *)calloc(N, sizeof(double));
-
-	// Perform the DFT
-	for (k = 0; k < N; k++) {
-		a[k] = b[k] = 0.0;
-		for (n = 0, nn = 0; n < N; n++, nn += 2) {
-			a[k] += (x[nn] * cos(omega * n * k));
-			b[k] -= (x[nn] * sin(omega * n * k));
-		}
+	 
+	 // initialize and zero pad the arrays
+	for(int i = 0; i < nn_2; i++)
+	{
+		x[i] = 0;
 	}
 
-	// Pack result back into input data array
-	for (n = 0, k = 0; n < N * 2; n += 2, k++) {
-		x[n] = a[k];
-		x[n + 1] = b[k];
+	for(int i = 0; i < nn_2; i++)
+	{
+		h[i] = 0;
 	}
 
-	// Free up memory used for arrays
-	free(a);
-	free(b);
-}
-
-
-
-// Takes the results from a DFT or FFT, and
-// calculates and displays the amplitudes of
-// the harmonics.
-
-void postProcessComplex(double x[], int N)
-{
-	int i, k, j;
-	double *amplitude, *result;
-
-	// Allocate temporary arrays
-	amplitude = (double *)calloc(N, sizeof(double));
-	result = (double *)calloc(N, sizeof(double));
-
-	// Calculate amplitude
-	for (k = 0, i = 0; k < N; k++, i += 2) {
-		// Scale results by N
-		double real = x[i] / (double)N;
-		double imag = x[i + 1] / (double)N;
-		// Calculate amplitude
-		amplitude[k] = sqrt(real * real + imag * imag);
+	for(int i = 0; i < nn_2; i++)
+	{
+		y[i] = 0;
 	}
 
-	// Combine amplitudes of positive and negative frequencies
-	result[0] = amplitude[0];
-	result[N / 2] = amplitude[N / 2];
-	for (k = 1, j = N - 1; k < N / 2; k++, j--)
-		result[k] = amplitude[k] + amplitude[j];
+	
+	//write the dry data.
+	for(int i = 0; i < dryNumSamples; i++)
+	{
+		x[2 * i] = data[i];
+	}
+
+	//write the ir data
+	for(int i = 0; i < irNumSamples; i++)
+	{
+		h[2 * i] = irdata[i];
+	}
+
+	four1(x - 1, nn, 1);
+	four1(h - 1, nn, 1);
+	 
+
+	// Complex multiplication i think (?)
+	for(int i = 0 ; i < nn_2; i+=2)
+	{
+		y[i] = (x[i] * h[i]) - (x[i + 1] * h[i + 1]);
+		y[i + 1] = (x[i + 1] * h[i]) - (x[i] * h[i + 1]);
+	}
 
 
-	// Print out final result
-	printf("Harmonic \tAmplitude\n");
-	printf("DC \t\t%.6f\n", result[0]);
-	for (k = 1; k <= N / 2; k++)
-		printf("%-d \t\t%.6f\n", k, result[k]);
-	printf("\n");
+	// inverse
+	four1(y - 1, nn, -1);
 
-	// Free up memory used for arrays
-	free(amplitude);
-	free(result);
+	//have to put the shit back in the right spots
+	for(int i = 0; i < outNumSamples; i++)
+	{
+		y[i] = y[i * 2];
+	}
+
+	free(x);
+	free(h);
+
+	return y;
+ 
 }
 
 
 
-int main()
-{
-	int i;
-	double complexData[SIZE * 2];
-
-	// Try the DFT on a sawtooth waveform
-	createComplexSawtooth(complexData, SIZE);
-	displayComplex(complexData, SIZE);
-	complexDFT(complexData, SIZE);
-	postProcessComplex(complexData, SIZE);
-
-	// Try the FFT on the same data
-	createComplexSawtooth(complexData, SIZE);
-	displayComplex(complexData, SIZE);
-	four1(complexData - 1, SIZE, 1);
-	postProcessComplex(complexData, SIZE);
-}
-
-
+/////////////////////////////////////////////////////////////////////////////////////////
 void print()
 {
 	printf("\n=============IN HEADER INFO =============\n");
@@ -345,15 +249,15 @@ int loadWave(char* filename)
 		//read data		
 		int bytesPerSample = dryHeader.bitsPerSample/8;
 		dryNumSamples = dryHeader.subChunk2Size / bytesPerSample;
-		data = (short*) malloc(sizeof(short) * dryNumSamples);
+		data = (double*) malloc(sizeof(double) * dryNumSamples);
 		
 		//fread(data, 1, bytesPerSample*numSamples, in);
-		
+		double MAX_VAL = 32767;
 		int i=0;
 		short sample=0;
 		while(fread(&sample, 1, bytesPerSample, in) == bytesPerSample)
 		{		
-			data[i++] = sample;
+			data[i++] = (double)sample/MAX_VAL;
 			sample = 0;			
 		}
 		
@@ -404,15 +308,15 @@ int loadIRWave(char* filename)
 		//read data		
 		int bytesPerSample = irHeader.bitsPerSample/8;
 		irNumSamples = irHeader.subChunk2Size / bytesPerSample;
-		irdata = (short*) malloc(sizeof(short) * irNumSamples);
+		irdata = (double*) malloc(sizeof(double) * irNumSamples);
 		
 		//fread(data, 1, bytesPerSample*numSamples, in);
-		
+		double MAX_VAL = 32767;
 		int i=0;
 		short sample=0;
 		while(fread(&sample, 1, bytesPerSample, in) == bytesPerSample)
 		{		
-			irdata[i++] = sample;
+			irdata[i++] = (double)sample/MAX_VAL;
 			sample = 0;			
 		}
 		
@@ -475,34 +379,34 @@ int saveWave(char* filename)
 		// IR[5] = 1.0;
 		
 		//write the data
-		float* newData = (float*) malloc(sizeof(float) * (outNumSamples));// + IRSize - 1));
-		float maxSample = -1;
-		float MAX_VAL = 32767.f;	//FIXME: find based on bits per sample
+		//double* newData = (double*) malloc(sizeof(double) * (outNumSamples));// + IRSize - 1));
+		double maxSample = -1;
+		double MAX_VAL = 32767;	//FIXME: find based on bits per sample
 			
-		for(int i=0; i < dryNumSamples; ++i)
+		for(int i=0; i < dryNumSamples; i++)
 		{			
 
 			//convolve
-			for(int j=0; j < irNumSamples; ++j)
-				newData[i+j] += ((float)data[i] / MAX_VAL) * ((float)irdata[j] / MAX_VAL);
+			// for(int j=0; j < irNumSamples; ++j)
+			// 	newData[i+j] += data[i] * irdata[j];
 			
 			//Keep track of max value for scaling
 			 if(i==0)
-			 	maxSample = newData[0];
-			 else if(newData[i] > maxSample)
-			 	maxSample = newData[i];
+			 	maxSample = outdata[0];
+			 else if(outdata[i] > maxSample)
+			 	maxSample = outdata[i];
 		}		
 		
 		//scale and re write the data
-		for(int i=0; i<outNumSamples; ++i)
+		for(int i=0; i<outNumSamples; i++)
 		{
-			newData[i] = (newData[i] / maxSample) ;
-			short sample = (short) (newData[i] * MAX_VAL);
+			outdata[i] = (outdata[i] / maxSample) ;
+			short sample = (short) (outdata[i] * MAX_VAL);
 			fwrite(&sample, 1, bytesPerSample, out);
 		}
 		
 		//clean up
-		free(newData);
+		//	free(newData);
 		fclose(out);
 		printf("Closing %s...\n",filename);
 	}
@@ -550,10 +454,12 @@ int main(int argc, char* argv[])
 		printIR();
 
 	outNumSamples = dryNumSamples + irNumSamples - 1;
+	outdata = convolve();
 		
 	saveWave(outputFileName);
 	free(data);
 	free(irdata);
+	free(outdata);
 
 	clock_t end = clock();
 
