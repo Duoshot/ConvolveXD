@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -24,8 +25,8 @@ struct Header{
 struct Header dryHeader;
 struct Header irHeader;
 
-short* data;
-short* irdata;
+double* data;
+double* irdata;
 
 int dryNumSamples;
 int irNumSamples;
@@ -104,15 +105,15 @@ int loadWave(char* filename)
 		//read data		
 		int bytesPerSample = dryHeader.bitsPerSample/8;
 		dryNumSamples = dryHeader.subChunk2Size / bytesPerSample;
-		data = (short*) malloc(sizeof(short) * dryNumSamples);
+		data = (double*) malloc(sizeof(double) * dryNumSamples);
 		
 		//fread(data, 1, bytesPerSample*numSamples, in);
-		
+		double MAX_VAL = 32767;
 		int i=0;
 		short sample=0;
 		while(fread(&sample, 1, bytesPerSample, in) == bytesPerSample)
 		{		
-			data[i++] = sample;
+			data[i++] = (double)sample/MAX_VAL ;
 			sample = 0;			
 		}
 		
@@ -163,15 +164,15 @@ int loadIRWave(char* filename)
 		//read data		
 		int bytesPerSample = irHeader.bitsPerSample/8;
 		irNumSamples = irHeader.subChunk2Size / bytesPerSample;
-		irdata = (short*) malloc(sizeof(short) * irNumSamples);
+		irdata = (double*) malloc(sizeof(double) * irNumSamples);
 		
 		//fread(data, 1, bytesPerSample*numSamples, in);
-		
+		double MAX_VAL = 32767;
 		int i=0;
 		short sample=0;
 		while(fread(&sample, 1, bytesPerSample, in) == bytesPerSample)
 		{		
-			irdata[i++] = sample;
+			irdata[i++] = (double)sample/MAX_VAL;
 			sample = 0;			
 		}
 		
@@ -234,16 +235,16 @@ int saveWave(char* filename)
 		// IR[5] = 1.0;
 		
 		//write the data
-		float* newData = (float*) malloc(sizeof(float) * (outNumSamples));// + IRSize - 1));
-		float maxSample = -1;
-		float MAX_VAL = 32767.f;	//FIXME: find based on bits per sample
+		double* newData = (double*) malloc(sizeof(double) * (outNumSamples));// + IRSize - 1));
+		double maxSample = -1;
+		double MAX_VAL = 32767;	//FIXME: find based on bits per sample
 			
 		for(int i=0; i < dryNumSamples; ++i)
 		{			
 
 			//convolve
 			for(int j=0; j < irNumSamples; ++j)
-				newData[i+j] += ((float)data[i] / MAX_VAL) * ((float)irdata[j] / MAX_VAL);
+				newData[i+j] += data[i] * irdata[j];
 			
 			//Keep track of max value for scaling
 			 if(i==0)
