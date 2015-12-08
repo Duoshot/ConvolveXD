@@ -223,17 +223,7 @@ int saveWave(char* filename)
 		//read data		
 		int bytesPerSample = dryHeader.bitsPerSample / 8;
 		int sampleCount =  dryHeader.subChunk2Size / bytesPerSample;
-		
-		//impulse response - echo
-		// int IRSize = 6;
-		// float IR[IRSize];
-		// IR[0] = 1.0;
-		// IR[1] = 1.0;
-		// IR[2] = 1.0;
-		// IR[3] = 1.0;
-		// IR[4] = 1.0;
-		// IR[5] = 1.0;
-		
+
 		//write the data
 		double* newData = (double*) malloc(sizeof(double) * (outNumSamples));// + IRSize - 1));
 		double maxSample = -1;
@@ -318,5 +308,5 @@ int main(int argc, char* argv[])
 	clock_t end = clock();
 
 	float seconds = (float)(end - start) / CLOCKS_PER_SEC;
-	printf("%f\n", seconds);
+	printf("Time to run entire program in seconds: %f\n", seconds);
 }
