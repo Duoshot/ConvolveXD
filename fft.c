@@ -102,18 +102,20 @@ void four1(double data[], int nn, int isign)
 }
 
 
-double * convolve()
+void convolve()
 {
 	 double * x;
 	 double * h;
 	 double * y;
 	 
-	 int nn = (int)pow(2, (int) log2(dryNumSamples) + 1);
-	 int nn_2 = 2 * nn; 
+	int nn = (int)pow(2, (int) log2(dryNumSamples) + 1);
+	int nn_2 = 2 * nn; 
+	
 	 
 	 h = (double*) malloc(sizeof(double) * nn_2); 
 	 x = (double*) malloc(sizeof(double) * nn_2); 
 	 y = (double*) malloc(sizeof(double) * nn_2); 
+	 outdata = (double*)malloc(sizeof(double) * nn);
 
 	 
 	 // initialize and zero pad the arrays
@@ -145,31 +147,31 @@ double * convolve()
 		h[2 * i] = irdata[i];
 	}
 
-	four1(x - 1, nn, 1);
+	
 	four1(h - 1, nn, 1);
+	four1(x - 1, nn, 1);
 	 
 
 	// Complex multiplication i think (?)
 	for(int i = 0 ; i < nn_2; i+=2)
 	{
 		y[i] = (x[i] * h[i]) - (x[i + 1] * h[i + 1]);
-		y[i + 1] = (x[i + 1] * h[i]) - (x[i] * h[i + 1]);
+		y[i + 1] = (x[i + 1] * h[i]) + (x[i] * h[i + 1]);
 	}
 
 
 	// inverse
 	four1(y - 1, nn, -1);
 
-	//have to put the shit back in the right spots
-	for(int i = 0; i < outNumSamples; i++)
+	for(int i = 0; i < nn_2; i++)
 	{
-		y[i] = y[i * 2];
+		outdata[i] = y[i*2]/(nn_2 * 2);
 	}
 
-	free(x);
-	free(h);
-
-	return y;
+	//have to put the shit back in the right spots
+	//free(x);
+	//free(h);
+	//free(y);
  
 }
 
@@ -398,7 +400,7 @@ int saveWave(char* filename)
 		}		
 		
 		//scale and re write the data
-		for(int i=0; i<outNumSamples; i++)
+		for(int i=0; i<dryNumSamples; i++)
 		{
 			outdata[i] = (outdata[i] / maxSample) ;
 			short sample = (short) (outdata[i] * MAX_VAL);
@@ -454,9 +456,11 @@ int main(int argc, char* argv[])
 		printIR();
 
 	outNumSamples = dryNumSamples + irNumSamples - 1;
-	outdata = convolve();
+	convolve();
 		
 	saveWave(outputFileName);
+
+
 	free(data);
 	free(irdata);
 	free(outdata);
