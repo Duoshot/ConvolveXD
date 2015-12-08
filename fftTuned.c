@@ -119,21 +119,13 @@ void convolve()
 
 	 
 	 // initialize and zero pad the arrays
+	 //code tuning 1: jamming
 	for(int i = 0; i < nn_2; i++)
 	{
 		x[i] = 0;
-	}
-
-	for(int i = 0; i < nn_2; i++)
-	{
 		h[i] = 0;
-	}
-
-	for(int i = 0; i < nn_2; i++)
-	{
 		y[i] = 0;
 	}
-
 	
 	//write the dry data.
 	for(int i = 0; i < dryNumSamples; i++)
@@ -441,7 +433,6 @@ int main(int argc, char* argv[])
 	convolve();
 		
 	saveWave(outputFileName);
-
 
 	free(data);
 	free(irdata);
