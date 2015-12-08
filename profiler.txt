@@ -1,3 +1,15 @@
+Baseline Program
+[lawg@csd A4l]$ gprof main -p
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total
+ time   seconds   seconds    calls   s/call   s/call  name
+100.20    259.90   259.90        1   259.90   259.90  saveWave
+  0.00    259.91     0.01        1     0.01     0.01  loadWave
+  0.00    259.91     0.00        1     0.00     0.00  loadIRWave
+  0.00    259.91     0.00        1     0.00     0.00  print
+  0.00    259.91     0.00        1     0.00     0.00  printIR
 
 
 BASE FFT
@@ -32,3 +44,19 @@ Each sample counts as 0.01 seconds.
   0.00      1.59     0.00        1     0.00     0.00  loadIRWave
   0.00      1.59     0.00        1     0.00     0.00  print
   0.00      1.59     0.00        1     0.00     0.00  printIR
+
+FFT TUNE 2
+
+[lawg@csd A4l]$ gprof fftTuned -p
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total
+ time   seconds   seconds    calls   s/call   s/call  name
+ 95.22      1.55     1.55        3     0.52     0.52  four1
+  4.30      1.62     0.07        1     0.07     1.62  convolve
+  0.61      1.63     0.01        1     0.01     0.01  saveWave
+  0.00      1.63     0.00        1     0.00     0.00  loadIRWave
+  0.00      1.63     0.00        1     0.00     0.00  loadWave
+  0.00      1.63     0.00        1     0.00     0.00  print
+  0.00      1.63     0.00        1     0.00     0.00  printIR

@@ -142,12 +142,12 @@ void convolve()
 	four1(h - 1, nn, 1);
 	four1(x - 1, nn, 1);
 	 
-	double MAX_VAL = 32767;
 	// Complex multiplication i think (?)
+	//code tuning 2: minimizing work inside arrays
 	for(int i = 0 ; i < nn_2; i+=2)
 	{
-		y[i] = (x[i]/MAX_VAL * h[i]/MAX_VAL) - (x[i + 1]/MAX_VAL * h[i + 1]/MAX_VAL);
-		y[i + 1] = (x[i + 1]/MAX_VAL * h[i]/MAX_VAL) + (x[i]/MAX_VAL * h[i + 1]/MAX_VAL);
+		y[i] = (x[i] * h[i]) - (x[i + 1] * h[i + 1]);
+		y[i + 1] = (x[i + 1] * h[i]) + (x[i] * h[i + 1]);
 	}
 
 
@@ -249,7 +249,7 @@ int loadWave(char* filename)
 		short sample=0;
 		while(fread(&sample, 1, bytesPerSample, in) == bytesPerSample)
 		{		
-			data[i++] = (double)sample;
+			data[i++] = (double)sample/MAX_VAL;	//code tuning 2: minimizing work inside arrays
 			sample = 0;			
 		}
 		
@@ -308,7 +308,7 @@ int loadIRWave(char* filename)
 		short sample=0;
 		while(fread(&sample, 1, bytesPerSample, in) == bytesPerSample)
 		{		
-			irdata[i++] = (double)sample;
+			irdata[i++] = (double)sample/MAX_VAL;	//code tuning 2: minimizing work inside arrays
 			sample = 0;			
 		}
 		
