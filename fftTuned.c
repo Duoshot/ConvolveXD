@@ -6,6 +6,7 @@
 #define PI         3.141592653589793
 #define TWO_PI     (2.0 * PI)
 #define SWAP(a,b)  tempr=(a);(a)=(b);(b)=tempr
+#define SIZE_OF_DOUBLE sizeof(double)	//code tune 3: precompute
 
 //#include <stdio.h>
 //#include <stdlib.h>
@@ -112,10 +113,10 @@ void convolve()
 	int nn_2 = 2 * nn; 
 	
 	 
-	 h = (double*) malloc(sizeof(double) * nn_2); 
-	 x = (double*) malloc(sizeof(double) * nn_2); 
-	 y = (double*) malloc(sizeof(double) * nn_2); 
-	 outdata = (double*)malloc(sizeof(double) * nn);
+	h = (double*) malloc(SIZE_OF_DOUBLE * nn_2); //code tune 3: precompute
+	x = (double*) malloc(SIZE_OF_DOUBLE * nn_2); //code tune 3: precompute
+	y = (double*) malloc(SIZE_OF_DOUBLE * nn_2); //code tune 3: precompute
+	outdata = (double*)malloc(SIZE_OF_DOUBLE * nn);	//code tune 3: precompute
 
 	 
 	 // initialize and zero pad the arrays
@@ -241,7 +242,7 @@ int loadWave(char* filename)
 		//read data		
 		int bytesPerSample = dryHeader.bitsPerSample/8;
 		dryNumSamples = dryHeader.subChunk2Size / bytesPerSample;
-		data = (double*) malloc(sizeof(double) * dryNumSamples);
+		data = (double*) malloc(SIZE_OF_DOUBLE* dryNumSamples);	//code tune 3: precompute
 		
 		//fread(data, 1, bytesPerSample*numSamples, in);
 		double MAX_VAL = 32767;
@@ -300,7 +301,7 @@ int loadIRWave(char* filename)
 		//read data		
 		int bytesPerSample = irHeader.bitsPerSample/8;
 		irNumSamples = irHeader.subChunk2Size / bytesPerSample;
-		irdata = (double*) malloc(sizeof(double) * irNumSamples);
+		irdata = (double*) malloc(SIZE_OF_DOUBLE * irNumSamples);	//code tune 3: precompute
 		
 		//fread(data, 1, bytesPerSample*numSamples, in);
 		double MAX_VAL = 32767;
