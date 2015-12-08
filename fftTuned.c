@@ -130,13 +130,13 @@ void convolve()
 	//write the dry data.
 	for(int i = 0; i < dryNumSamples; i++)
 	{
-		x[2 * i] = data[i];
+		x[i << 1] = data[i];	//code tune 4: strength reduction
 	}
 
 	//write the ir data
 	for(int i = 0; i < irNumSamples; i++)
 	{
-		h[2 * i] = irdata[i];
+		h[i << 1] = irdata[i];	//code tune 4: strength reduction
 	}
 
 	
@@ -158,7 +158,7 @@ void convolve()
 	//have to put the shit back in the right spots
 	for(int i = 0; i < nn_2; i++)
 	{
-		outdata[i] = y[i*2]/(nn_2 * 2);
+		outdata[i] = y[i << 1]/(nn_2 << 1);	//code tune 4: strength reduction
 	}
 
 	
