@@ -119,21 +119,13 @@ void convolve()
 
 	 
 	 // initialize and zero pad the arrays
+	 //code tuning 1: jamming
 	for(int i = 0; i < nn_2; i++)
 	{
 		x[i] = 0;
-	}
-
-	for(int i = 0; i < nn_2; i++)
-	{
 		h[i] = 0;
-	}
-
-	for(int i = 0; i < nn_2; i++)
-	{
 		y[i] = 0;
 	}
-
 	
 	//write the dry data.
 	for(int i = 0; i < dryNumSamples; i++)
@@ -163,16 +155,15 @@ void convolve()
 	// inverse
 	four1(y - 1, nn, -1);
 
+	//have to put the shit back in the right spots
 	for(int i = 0; i < nn_2; i++)
 	{
 		outdata[i] = y[i*2]/(nn_2 * 2);
 	}
 
-	//have to put the shit back in the right spots
-	//free(x);
-	//free(h);
-	//free(y);
- 
+	
+	free(x);
+	free(h);
 }
 
 
@@ -369,30 +360,13 @@ int saveWave(char* filename)
 		//read data		
 		int bytesPerSample = dryHeader.bitsPerSample / 8;
 		int sampleCount =  dryHeader.subChunk2Size / bytesPerSample;
-		
-		//impulse response - echo
-		// int IRSize = 6;
-		// float IR[IRSize];
-		// IR[0] = 1.0;
-		// IR[1] = 1.0;
-		// IR[2] = 1.0;
-		// IR[3] = 1.0;
-		// IR[4] = 1.0;
-		// IR[5] = 1.0;
-		
-		//write the data
-		//double* newData = (double*) malloc(sizeof(double) * (outNumSamples));// + IRSize - 1));
+
 		double maxSample = -1;
 		double MAX_VAL = 32767;	//FIXME: find based on bits per sample
 			
 		for(int i=0; i < dryNumSamples; i++)
 		{			
 
-			//convolve
-			// for(int j=0; j < irNumSamples; ++j)
-			// 	newData[i+j] += data[i] * irdata[j];
-			
-			//Keep track of max value for scaling
 			 if(i==0)
 			 	maxSample = outdata[0];
 			 else if(outdata[i] > maxSample)
@@ -460,7 +434,6 @@ int main(int argc, char* argv[])
 		
 	saveWave(outputFileName);
 
-
 	free(data);
 	free(irdata);
 	free(outdata);
@@ -468,5 +441,5 @@ int main(int argc, char* argv[])
 	clock_t end = clock();
 
 	float seconds = (float)(end - start) / CLOCKS_PER_SEC;
-	printf("%f\n", seconds);
+	printf("Time to run entire program in seconds: %f\n", seconds);
 }
