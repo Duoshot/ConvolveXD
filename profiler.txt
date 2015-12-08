@@ -92,3 +92,37 @@ Each sample counts as 0.01 seconds.
   0.00      1.56     0.00        1     0.00     0.00  loadIRWave
   0.00      1.56     0.00        1     0.00     0.00  print
   0.00      1.56     0.00        1     0.00     0.00  printIR
+
+FFT TUNE 5
+
+Time to run entire program in seconds: 1.670576
+[lawg@csd A4l]$ gprof fftTuned -p
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total
+ time   seconds   seconds    calls   s/call   s/call  name
+ 94.71      1.57     1.57        3     0.52     0.52  four1
+  3.02      1.62     0.05        1     0.05     1.62  convolve
+  1.81      1.65     0.03        1     0.03     0.03  saveWave
+  0.60      1.66     0.01        1     0.01     0.01  loadIRWave
+  0.00      1.66     0.00        1     0.00     0.00  loadWave
+  0.00      1.66     0.00        1     0.00     0.00  print
+  0.00      1.66     0.00        1     0.00     0.00  printIR
+
+FFT TUNE 6
+
+[lawg@csd A4l]$ gprof fftTuned -p
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total
+ time   seconds   seconds    calls   s/call   s/call  name
+ 95.61      1.48     1.48        3     0.49     0.49  four1
+  3.23      1.53     0.05        1     0.05     1.53  convolve
+  0.65      1.54     0.01        1     0.01     0.01  loadWave
+  0.65      1.55     0.01        1     0.01     0.01  saveWave
+  0.00      1.55     0.00        1     0.00     0.00  loadIRWave
+  0.00      1.55     0.00        1     0.00     0.00  print
+  0.00      1.55     0.00        1     0.00     0.00  printIR
+

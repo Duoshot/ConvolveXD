@@ -118,13 +118,18 @@ void convolve()
 	y = (double*) malloc(SIZE_OF_DOUBLE * nn_2); //code tune 3: precompute
 	outdata = (double*)malloc(SIZE_OF_DOUBLE * nn);	//code tune 3: precompute
 
-	 
+	 //code tune 1: jamming
 	 // initialize and zero pad the arrays
-	for(int i = 0; i < nn_2; i++)
+	for(int i = 0; i < nn_2; i+=2)	//code tune 6: partial unrolling
 	{
 		x[i] = 0;
+		x[i+1] = 0;
+
 		h[i] = 0;
+		h[i+1] = 0;
+
 		y[i] = 0;
+		y[i+1] = 0;
 	}
 	
 	//write the dry data.
@@ -143,12 +148,23 @@ void convolve()
 	four1(h - 1, nn, 1);
 	four1(x - 1, nn, 1);
 	 
-	// Complex multiplication i think (?)
+	double xi;
+	double xi1;
+	double hi;
+	double hi1;
+	// Complex multiplication 
 	//code tuning 2: minimizing work inside arrays
+	//code tune 5: minimize access to arrays
 	for(int i = 0 ; i < nn_2; i+=2)
 	{
-		y[i] = (x[i] * h[i]) - (x[i + 1] * h[i + 1]);
-		y[i + 1] = (x[i + 1] * h[i]) + (x[i] * h[i + 1]);
+		xi = x[i];
+		xi1 = x[i+1];
+
+		hi = h[i];
+		hi1 = h[i+1];
+
+		y[i] = (xi * hi) - (xi1 * hi1);
+		y[i + 1] = (xi1 * hi) + (xi * hi1);
 	}
 
 
