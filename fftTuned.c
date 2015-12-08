@@ -413,7 +413,7 @@ int saveWave(char* filename)
 int main(int argc, char* argv[])
 {
 
-	clock_t start = clock();
+	
 
 	printf("=============================================================\n");
 	printf("=============================================================\n");
@@ -438,6 +438,8 @@ int main(int argc, char* argv[])
 	printf("Input file is: %s\n", inputFileName);
 	printf("Impulse response file is: %s\n", irFileName);
 	printf("Output file is: %s\n", outputFileName);
+
+	clock_t start = clock();
 	
 	if(loadWave(inputFileName))
 		print();
@@ -449,13 +451,13 @@ int main(int argc, char* argv[])
 	convolve();
 		
 	saveWave(outputFileName);
-
+	clock_t end = clock();
 
 	free(data);
 	free(irdata);
 	free(outdata);
 
-	clock_t end = clock();
+	
 
 	float seconds = (float)(end - start) / CLOCKS_PER_SEC;
 	printf("Time to run entire program in seconds: %f\n", seconds);
