@@ -126,3 +126,16 @@ Each sample counts as 0.01 seconds.
   0.00      1.55     0.00        1     0.00     0.00  print
   0.00      1.55     0.00        1     0.00     0.00  printIR
 
+FFT USING COMPILE OPTIMIZATION
+
+[lawg@csd A4l]$ gcc fftTuned.c -O2 -o fftTuned -lm -pg
+
+[lawg@csd A4l]$ gprof fftTuned -p
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total
+ time   seconds   seconds    calls  ms/call  ms/call  name
+ 96.90      1.47     1.47        3   490.94   490.94  four1
+  3.30      1.52     0.05                             convolve
+
